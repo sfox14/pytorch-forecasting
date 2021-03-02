@@ -684,6 +684,7 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
         add_loss_to_title: bool = False,
         show_future_observed: bool = True,
         ax=None,
+        loc=None,
     ) -> plt.Figure:
         """
         Plot actuals vs prediction and attention
@@ -703,7 +704,7 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
 
         # plot prediction as normal
         fig = super().plot_prediction(
-            x, out, idx=idx, add_loss_to_title=add_loss_to_title, show_future_observed=show_future_observed, ax=ax
+            x, out, idx=idx, add_loss_to_title=add_loss_to_title, show_future_observed=show_future_observed, ax=ax, loc=loc
         )
 
         # add attention on secondary axis

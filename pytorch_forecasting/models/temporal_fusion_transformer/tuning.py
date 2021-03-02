@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 
 from pytorch_forecasting import TemporalFusionTransformer
 from pytorch_forecasting.data import TimeSeriesDataSet
-from pytorch_forecasting.metrics import QuantileLoss
+from pytorch_forecasting.metrics import QuantileLoss, MultiLoss
 
 optuna_logger = logging.getLogger("optuna")
 
@@ -112,7 +112,9 @@ def optimize_hyperparameters(
     optuna.logging.set_verbosity(optuna_verbose)
 
     loss = kwargs.get(
-        "loss", QuantileLoss()
+        #"loss", QuantileLoss()
+        'loss', MultiLoss(metrics=[QuantileLoss() for x in range(400)], 
+                    weights=[1.0 for x in range(400)])
     )  # need a deepcopy of loss as it will otherwise propagate from one trial to the next
 
     # create objective function

@@ -514,6 +514,7 @@ class BaseModel(LightningModule):
         add_loss_to_title: Union[Metric, torch.Tensor, bool] = False,
         show_future_observed: bool = True,
         ax=None,
+        loc=None,
     ) -> plt.Figure:
         """
         Plot prediction of prediction vs actuals
@@ -539,6 +540,11 @@ class BaseModel(LightningModule):
         y_raws = to_list(out["prediction"])
         y_hats = to_list(self.loss.to_prediction(out["prediction"]))
         y_quantiles = to_list(self.loss.to_quantiles(out["prediction"]))
+
+        if loc is not None:
+            y_raws = [y_raws[loc]]
+            y_hats = [y_hats[loc]]
+            y_quantiles = [y_quantiles[loc]]
 
         # for each target, plot
         figs = []
@@ -628,7 +634,10 @@ class BaseModel(LightningModule):
 
         # return multiple of target is a list, otherwise return single figure
         if isinstance(x["encoder_target"], (tuple, list)):
-            return figs
+            if loc is not None:
+                return figs[0]
+            else:
+                return figs
         else:
             return fig
 
