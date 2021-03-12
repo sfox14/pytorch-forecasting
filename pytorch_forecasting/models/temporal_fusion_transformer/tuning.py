@@ -42,7 +42,7 @@ def optimize_hyperparameters(
     model_path: str,
     max_epochs: int = 20,
     n_trials: int = 100,
-    timeout: float = 3600 * 8.0,  # 8 hours
+    timeout: float = 3600 * 120.0,  # 120 hours
     gradient_clip_val_range: Tuple[float, float] = (0.01, 100.0),
     hidden_size_range: Tuple[int, int] = (16, 265),
     hidden_continuous_size_range: Tuple[int, int] = (8, 64),
@@ -54,6 +54,7 @@ def optimize_hyperparameters(
     log_dir: str = "lightning_logs",
     study: optuna.Study = None,
     verbose: Union[int, bool] = None,
+    multi=True,
     **kwargs,
 ) -> optuna.Study:
     """
@@ -111,10 +112,10 @@ def optimize_hyperparameters(
     optuna_verbose = logging_level[verbose]
     optuna.logging.set_verbosity(optuna_verbose)
 
+    loss_func = MultiLoss(metrics=[QuantileLoss() for x in range(400)], weights=[1.0 for x in range(400)]) if multi else QuantileLoss()
+
     loss = kwargs.get(
-        #"loss", QuantileLoss()
-        'loss', MultiLoss(metrics=[QuantileLoss() for x in range(400)], 
-                    weights=[1.0 for x in range(400)])
+        'loss', loss_func
     )  # need a deepcopy of loss as it will otherwise propagate from one trial to the next
 
     # create objective function

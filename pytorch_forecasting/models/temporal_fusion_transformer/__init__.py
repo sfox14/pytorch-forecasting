@@ -168,6 +168,7 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
                 for name in self.hparams.static_reals
             }
         )
+
         self.static_variable_selection = VariableSelectionNetwork(
             input_sizes=static_input_sizes,
             hidden_size=self.hparams.hidden_size,
@@ -684,7 +685,10 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
         add_loss_to_title: bool = False,
         show_future_observed: bool = True,
         ax=None,
-        loc=None,
+        receiver=None,
+        channel=None,
+        time_index=None,
+        scenario=1
     ) -> plt.Figure:
         """
         Plot actuals vs prediction and attention
@@ -704,7 +708,8 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
 
         # plot prediction as normal
         fig = super().plot_prediction(
-            x, out, idx=idx, add_loss_to_title=add_loss_to_title, show_future_observed=show_future_observed, ax=ax, loc=loc
+            x, out, idx=idx, add_loss_to_title=add_loss_to_title, show_future_observed=show_future_observed, ax=ax,
+            receiver=receiver, channel=channel, time_index=time_index, scenario=scenario
         )
 
         # add attention on secondary axis

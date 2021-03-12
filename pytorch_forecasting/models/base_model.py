@@ -514,7 +514,10 @@ class BaseModel(LightningModule):
         add_loss_to_title: Union[Metric, torch.Tensor, bool] = False,
         show_future_observed: bool = True,
         ax=None,
-        loc=None,
+        receiver=None,
+        channel=None,
+        time_index=None,
+        scenario=1
     ) -> plt.Figure:
         """
         Plot prediction of prediction vs actuals
@@ -541,10 +544,13 @@ class BaseModel(LightningModule):
         y_hats = to_list(self.loss.to_prediction(out["prediction"]))
         y_quantiles = to_list(self.loss.to_quantiles(out["prediction"]))
 
-        if loc is not None:
-            y_raws = [y_raws[loc]]
-            y_hats = [y_hats[loc]]
-            y_quantiles = [y_quantiles[loc]]
+        if scenario == 1:
+            y_raws = [y_raws[receiver]]
+            y_hats = [y_hats[receiver]]
+            y_quantiles = [y_quantiles[receiver]]
+            encoder_targets = [encoder_targets[receiver]]
+            decoder_targets = [decoder_targets[receiver]]
+
 
         # for each target, plot
         figs = []
@@ -590,11 +596,13 @@ class BaseModel(LightningModule):
             else:
                 plotter = ax.scatter
 
+
             # plot observed prediction
             if show_future_observed:
                 plotter(x_pred, y[-n_pred:], label=None, c=obs_color)
 
             # plot prediction
+            #y_hat = torch.clamp(y_hat, min=0.0)
             plotter(x_pred, y_hat, label="predicted", c=pred_color)
 
             # plot predicted quantiles
@@ -628,16 +636,17 @@ class BaseModel(LightningModule):
                 else:
                     loss_value = loss
                 ax.set_title(f"Loss {loss_value}")
+            
+            if receiver is not None and channel is not None and time_index is not None:
+                ax.set_title(f"Receiver={receiver} and Channel={channel} at Time={time_index}")
+
             ax.set_xlabel("Time index")
             fig.legend()
             figs.append(fig)
 
         # return multiple of target is a list, otherwise return single figure
         if isinstance(x["encoder_target"], (tuple, list)):
-            if loc is not None:
-                return figs[0]
-            else:
-                return figs
+            return figs
         else:
             return fig
 
